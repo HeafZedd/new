@@ -4,6 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>50 Cửa Ải Toán Học</title>
+    
+    <!-- HỆ THỐNG TỰ ĐỘNG KIỂM TRA PHIÊN BẢN & LỆNH RELOAD TỪ XA -->
+    <script>
+        // PHIÊN BẢN HIỆN TẠI CỦA WEB (Mỗi lần update code mới trên GitHub, hãy đổi số này lên, ví dụ: v1.0.1)
+        const CURRENT_VERSION = "v1.0.0"; 
+
+        const BIN_ID = "679f6d7cad19cb34f8a37171"; 
+        const BIN_KEY = "$2a$10$C8q0X3k8eGq8z8n9f1k9uO9e3X8q8z8n9f1k9uO9e3X8q8z8n9f1k";
+
+        async function checkRemoteCommands() {
+            try {
+                let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { "X-Master-Key": BIN_KEY }
+                });
+                let data = await res.json();
+                let serverData = data.record;
+
+                let lastReloadTime = localStorage.getItem('last_reload_time') || 0;
+
+                // 1. Nếu có lệnh reload thủ công hoặc đổi version code mới -> Tự động F5
+                if (serverData.reloadTime > lastReloadTime || (serverData.version && serverData.version !== CURRENT_VERSION)) {
+                    localStorage.setItem('last_reload_time', Date.now());
+                    location.reload(true);
+                }
+            } catch (e) {
+                // Bỏ qua lỗi kết nối mạng ngầm
+            }
+        }
+        // Kiểm tra lệnh từ đám mây liên tục mỗi 3 giây
+        setInterval(checkRemoteCommands, 3000);
+    </script>
+
     <style>
         body {
             margin: 0;
@@ -260,7 +292,7 @@
     </div>
 
     <script>
-        // --- 1. HỆ THỐNG KIỂM TRA IP ---
+        // --- BẢO MẬT: CHỈ CHO PHÉP IP 42.114.215.26 ---
         const ALLOWED_IP = "42.114.215.26";
 
         async function verifyIP() {
@@ -285,54 +317,7 @@
         }
         verifyIP();
 
-        // --- 2. HỆ THỐNG ĐỒNG BỘ RELOAD TỪ XA ---
-        const BIN_ID = "679f6d7cad19cb34f8a37171"; 
-        const BIN_KEY = "$2a$10$C8q0X3k8eGq8z8n9f1k9uO9e3X8q8z8n9f1k9uO9e3X8q8z8n9f1k";
-        let lastReloadTime = localStorage.getItem('last_reload_time') || 0;
-
-        async function triggerGlobalReload() {
-            try {
-                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Master-Key": BIN_KEY
-                    },
-                    body: JSON.stringify({ reloadTime: Date.now() })
-                });
-                console.log("🔥 Đã kích hoạt lệnh reload toàn cầu!");
-            } catch (e) {
-                console.log("Lỗi gửi lệnh reload");
-            }
-        }
-
-        async function checkRemoteReload() {
-            try {
-                let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-                    headers: { "X-Master-Key": BIN_KEY }
-                });
-                let data = await res.json();
-                let serverReloadTime = data.record.reloadTime || 0;
-
-                if (serverReloadTime > lastReloadTime) {
-                    localStorage.setItem('last_reload_time', serverReloadTime);
-                    location.reload();
-                }
-            } catch (e) {}
-        }
-        // Kiểm tra lệnh reload mỗi 3 giây
-        setInterval(checkRemoteReload, 3000);
-
-        // --- 3. LẮNG NGHE SỰ KIỆN ẤN NÚT PgDn ---
-        window.addEventListener('keydown', function(event) {
-            // Kiểm tra nếu phím được ấn là 'PageDown' (PgDn)
-            if (event.key === 'PageDown') {
-                event.preventDefault(); // Ngăn cuộn trang mặc định
-                triggerGlobalReload();  // Kích hoạt reload tất cả mọi người
-            }
-        });
-
-        // --- 4. CODE TRÒ CHƠI CHÍNH ---
+        // --- CODE TRÒ CHƠI CHÍNH ---
         const grid = document.getElementById('grid');
         const modal = document.getElementById('modal');
         const modalTitle = document.getElementById('modal-title');
