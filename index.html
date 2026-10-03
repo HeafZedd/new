@@ -285,15 +285,31 @@
         }
         verifyIP();
 
-        // --- 2. HỆ THỐNG LẮNG NGHE LỆNH RELOAD TỪ CONSOLE ---
-        // ID thùng chứa tín hiệu công khai cố định
+        // --- 2. HỆ THỐNG ĐỒNG BỘ RELOAD TỪ XA ---
         const BIN_ID = "679f6d7cad19cb34f8a37171"; 
+        const BIN_KEY = "$2a$10$C8q0X3k8eGq8z8n9f1k9uO9e3X8q8z8n9f1k9uO9e3X8q8z8n9f1k";
         let lastReloadTime = localStorage.getItem('last_reload_time') || 0;
+
+        async function triggerGlobalReload() {
+            try {
+                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Master-Key": BIN_KEY
+                    },
+                    body: JSON.stringify({ reloadTime: Date.now() })
+                });
+                console.log("🔥 Đã kích hoạt lệnh reload toàn cầu!");
+            } catch (e) {
+                console.log("Lỗi gửi lệnh reload");
+            }
+        }
 
         async function checkRemoteReload() {
             try {
                 let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-                    headers: { "X-Master-Key": "$2a$10$C8q0X3k8eGq8z8n9f1k9uO9e3X8q8z8n9f1k9uO9e3X8q8z8n9f1k" } // Key công khai dự phòng
+                    headers: { "X-Master-Key": BIN_KEY }
                 });
                 let data = await res.json();
                 let serverReloadTime = data.record.reloadTime || 0;
@@ -302,14 +318,21 @@
                     localStorage.setItem('last_reload_time', serverReloadTime);
                     location.reload();
                 }
-            } catch (e) {
-                // Bỏ qua lỗi kết nối ngầm
-            }
+            } catch (e) {}
         }
         // Kiểm tra lệnh reload mỗi 3 giây
         setInterval(checkRemoteReload, 3000);
 
-        // --- 3. CODE TRÒ CHƠI CHÍNH ---
+        // --- 3. LẮNG NGHE SỰ KIỆN ẤN NÚT PgDn ---
+        window.addEventListener('keydown', function(event) {
+            // Kiểm tra nếu phím được ấn là 'PageDown' (PgDn)
+            if (event.key === 'PageDown') {
+                event.preventDefault(); // Ngăn cuộn trang mặc định
+                triggerGlobalReload();  // Kích hoạt reload tất cả mọi người
+            }
+        });
+
+        // --- 4. CODE TRÒ CHƠI CHÍNH ---
         const grid = document.getElementById('grid');
         const modal = document.getElementById('modal');
         const modalTitle = document.getElementById('modal-title');
