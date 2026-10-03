@@ -20,7 +20,6 @@
             position: relative;
         }
 
-        /* Màn hình chặn IP */
         #ip-block-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -38,7 +37,6 @@
         #ip-block-screen h1 { font-size: 32px; margin-bottom: 10px; }
         #ip-block-screen p { color: #94a3b8; font-size: 16px; }
 
-        /* Hộp hiển thị Bá Khí ở góc trên bên phải */
         .ba-khi-box {
             position: absolute;
             top: 20px;
@@ -56,7 +54,6 @@
             z-index: 10;
         }
 
-        /* Thanh tiến độ hoàn thành */
         .progress-container {
             width: 100%;
             max-width: 900px;
@@ -74,7 +71,6 @@
             transition: width 0.4s ease;
         }
 
-        /* Phần chữ xuất hiện phía trên lưới */
         .header-container {
             text-align: center;
             margin-bottom: 20px;
@@ -100,13 +96,11 @@
             letter-spacing: 0.5px;
         }
 
-        /* Màu các cấp độ */
-        .c-lv1 { background: #3498db; } /* 1-10 */
-        .c-lv2 { background: #2ecc71; } /* 11-30 */
-        .c-lv3 { background: #e67e22; } /* 31-40 */
-        .c-lv4 { background: #9b59b6; } /* 41-50 */
+        .c-lv1 { background: #3498db; }
+        .c-lv2 { background: #2ecc71; }
+        .c-lv3 { background: #e67e22; }
+        .c-lv4 { background: #9b59b6; }
 
-        /* Lưới 50 hình tròn */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
@@ -135,9 +129,7 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
-        .circle:hover {
-            transform: translateY(-5px) scale(1.1);
-        }
+        .circle:hover { transform: translateY(-5px) scale(1.1); }
 
         .circle.solved {
             background: #f1c40f !important;
@@ -146,12 +138,7 @@
             border: 3px solid #fff;
             cursor: not-allowed;
         }
-        
-        .circle.solved:hover {
-            transform: none;
-        }
 
-        /* Cửa sổ Popup (Modal) */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -171,7 +158,6 @@
             border-radius: 12px;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-            position: relative;
             animation: modalPop 0.3s ease;
         }
 
@@ -180,11 +166,7 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
-        .modal-box h2 {
-            margin-top: 0;
-            color: #e74c3c;
-            text-transform: uppercase;
-        }
+        .modal-box h2 { margin-top: 0; color: #e74c3c; text-transform: uppercase; }
 
         #math-question {
             font-size: 22px;
@@ -225,15 +207,9 @@
             font-weight: bold;
             border-radius: 6px;
             cursor: pointer;
-            transition: 0.2s;
         }
         .btn-submit:hover { background: #219653; }
         
-        .btn-submit:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-        }
-
         .btn-close {
             background: #95a5a6;
             color: white;
@@ -245,41 +221,31 @@
         }
         .btn-close:hover { background: #7f8c8d; }
 
-        #feedback {
-            margin-top: 15px;
-            font-weight: bold;
-            font-size: 16px;
-            min-height: 20px;
-        }
+        #feedback { margin-top: 15px; font-weight: bold; font-size: 16px; min-height: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- Màn hình chờ kiểm tra IP hoặc thông báo chặn -->
     <div id="ip-block-screen">
         <h1>🔒 Đang kiểm tra quyền truy cập...</h1>
         <p>Hệ thống đang xác thực địa chỉ IP của bạn.</p>
     </div>
 
-    <!-- Khung hiển thị Bá Khí ở góc trên bên phải -->
     <div class="ba-khi-box">
         Bá khí: <span id="ba-khi-score">0</span>
     </div>
 
-    <!-- Phần chữ xuất hiện phía trên lưới -->
     <div class="header-container">
         <div class="main-title">câu hỏi của heafzedd</div>
         <div class="sub-title">giải hết = pro + bá khí aura</div>
     </div>
 
-    <!-- Thanh tiến độ -->
     <div class="progress-container">
         <div class="progress-bar" id="progress-bar"></div>
     </div>
 
     <div class="grid-container" id="grid"></div>
 
-    <!-- Cửa sổ hiển thị câu hỏi -->
     <div class="modal-overlay" id="modal">
         <div class="modal-box">
             <h2 id="modal-title">CÂU HỎI X</h2>
@@ -294,40 +260,56 @@
     </div>
 
     <script>
-        // HỆ THỐNG KIỂM TRA IP ĐỘC QUYỀN
+        // --- 1. HỆ THỐNG KIỂM TRA IP ---
         const ALLOWED_IP = "42.114.215.26";
 
         async function verifyIP() {
             try {
-                // Sử dụng API lấy IP công cộng miễn phí
                 let response = await fetch('https://api.ipify.org?format=json');
                 let data = await response.json();
-                let userIP = data.ip;
-
-                if (userIP === ALLOWED_IP) {
-                    // Nếu khớp IP -> Cho ẩn màn hình chặn và mở trang web
+                if (data.ip === ALLOWED_IP) {
                     document.getElementById('ip-block-screen').style.display = 'none';
                 } else {
-                    // Nếu không khớp -> Hiển thị từ chối truy cập
                     document.getElementById('ip-block-screen').innerHTML = `
                         <h1 style="color: #ef4444;">⛔ TRUY CẬP BỊ TỪ CHỐI</h1>
-                        <p>IP của bạn (${userIP}) không được phép sử dụng trang web này.</p>
+                        <p>IP của bạn (${data.ip}) không được phép sử dụng trang web này.</p>
                         <p style="font-size: 12px; margin-top: 15px; color: #64748b;">Chỉ IP: ${ALLOWED_IP} mới có quyền truy cập.</p>
                     `;
                 }
             } catch (error) {
-                // Trường hợp mất mạng hoặc lỗi API chặn, đề phòng hiển thị thông báo
                 document.getElementById('ip-block-screen').innerHTML = `
                     <h1 style="color: #f59e0b;">⚠️ LỖI XÁC THỰC IP</h1>
-                    <p>Không thể kiểm tra địa chỉ IP của bạn. Vui lòng kiểm tra lại kết nối mạng.</p>
+                    <p>Không thể kiểm tra địa chỉ IP của bạn.</p>
                 `;
             }
         }
-
-        // Chạy kiểm tra ngay khi tải trang
         verifyIP();
 
-        // ----------------- CODE TRÒ CHƠI -----------------
+        // --- 2. HỆ THỐNG LẮNG NGHE LỆNH RELOAD TỪ CONSOLE ---
+        // ID thùng chứa tín hiệu công khai cố định
+        const BIN_ID = "679f6d7cad19cb34f8a37171"; 
+        let lastReloadTime = localStorage.getItem('last_reload_time') || 0;
+
+        async function checkRemoteReload() {
+            try {
+                let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { "X-Master-Key": "$2a$10$C8q0X3k8eGq8z8n9f1k9uO9e3X8q8z8n9f1k9uO9e3X8q8z8n9f1k" } // Key công khai dự phòng
+                });
+                let data = await res.json();
+                let serverReloadTime = data.record.reloadTime || 0;
+
+                if (serverReloadTime > lastReloadTime) {
+                    localStorage.setItem('last_reload_time', serverReloadTime);
+                    location.reload();
+                }
+            } catch (e) {
+                // Bỏ qua lỗi kết nối ngầm
+            }
+        }
+        // Kiểm tra lệnh reload mỗi 3 giây
+        setInterval(checkRemoteReload, 3000);
+
+        // --- 3. CODE TRÒ CHƠI CHÍNH ---
         const grid = document.getElementById('grid');
         const modal = document.getElementById('modal');
         const modalTitle = document.getElementById('modal-title');
@@ -357,139 +339,63 @@
                 osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1);
                 gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
             } else {
                 osc.frequency.setValueAtTime(200, audioCtx.currentTime);
                 osc.frequency.setValueAtTime(120, audioCtx.currentTime + 0.15);
                 gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
             }
         }
 
-        function updateBaKhiDisplay() {
-            baKhiScoreDisplay.innerText = baKhiScore.toLocaleString();
-        }
-
-        function updateProgress() {
-            let percent = (solvedCount / 50) * 100;
-            progressBar.style.width = percent + '%';
-        }
+        function updateBaKhiDisplay() { baKhiScoreDisplay.innerText = baKhiScore.toLocaleString(); }
+        function updateProgress() { progressBar.style.width = ((solvedCount / 50) * 100) + '%'; }
 
         for (let i = 1; i <= 50; i++) {
             const circle = document.createElement('div');
             circle.classList.add('circle');
             circle.innerText = i;
             circle.id = 'circle-' + i;
-
             if (i <= 10) circle.classList.add('c-lv1');
             else if (i <= 30) circle.classList.add('c-lv2');
             else if (i <= 40) circle.classList.add('c-lv3');
             else circle.classList.add('c-lv4');
-
             circle.onclick = () => openQuestion(i);
             grid.appendChild(circle);
         }
 
         answerInput.addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                checkAnswer();
-            }
+            if (event.key === "Enter") { event.preventDefault(); checkAnswer(); }
         });
 
-        function rand(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
+        function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
         function openQuestion(id) {
             let circle = document.getElementById('circle-' + id);
-            if (circle.classList.contains('solved')) {
-                return;
-            }
+            if (circle.classList.contains('solved')) return;
 
             currentCircleId = id;
             modalTitle.innerText = `CÂU HỎI ${id}`;
             answerInput.value = "";
             feedback.innerText = "";
-            
             answerInput.disabled = false;
             submitBtn.disabled = false;
             isProcessing = false;
 
-            let qText = "";
-            let qAns = 0;
-
+            let qText = ""; let qAns = 0;
             if (id <= 10) {
-                let type = rand(1, 2);
-                if (type === 1) {
-                    let a = rand(1, 30);
-                    let b = rand(1, 30);
-                    qText = `${a} + ${b} = ?`;
-                    qAns = a + b;
-                } else {
-                    let a = rand(15, 50);
-                    let b = rand(1, a); 
-                    qText = `${a} - ${b} = ?`;
-                    qAns = a - b;
-                }
-            } 
-            else if (id <= 30) {
-                let type = rand(1, 2);
-                if (type === 1) { 
-                    let a = rand(2, 12);
-                    let b = rand(2, 15);
-                    qText = `${a} × ${b} = ?`;
-                    qAns = a * b;
-                } else { 
-                    let b = rand(2, 15);
-                    let c = rand(2, 15);
-                    let a = b * c;
-                    qText = `${a} ÷ ${b} = ?`;
-                    qAns = c;
-                }
-            }
-            else if (id <= 40) {
-                let type = rand(1, 2);
-                if (type === 1) { 
-                    let a = rand(3, 15);
-                    let b = rand(3, 10);
-                    let c = rand(5, 50);
-                    qText = `${a} × ${b} + ${c} = ?`;
-                    qAns = (a * b) + c;
-                } else { 
-                    let x = rand(2, 15);
-                    let a = rand(2, 10);
-                    let b = rand(1, 20);
-                    let c = (a * x) - b;
-                    qText = `Tìm X biết:\n${a} × X - ${b} = ${c}`;
-                    qAns = x;
-                }
-            }
-            else {
-                let type = rand(1, 4);
-                if (type === 1) { 
-                    let k = rand(2, 6);
-                    let c = rand(1, 5);
-                    qText = `Cho hàm số f(x) = ${k}x².\nTính đạo hàm f'(${c}) = ?`;
-                    qAns = 2 * k * c;
-                } else if (type === 2) { 
-                    let a = rand(1, 4);
-                    let k = rand(1, 4) * 2; 
-                    qText = `Tích phân từ 0 đến ${a} của (${k}x)dx = ?`;
-                    qAns = (k / 2) * (a * a);
-                } else if (type === 3) { 
-                    let k = rand(2, 9);
-                    qText = `Tính giới hạn:\nlim(x→0) [sin(${k}x) / x] = ?`;
-                    qAns = k;
-                } else { 
-                    let a = rand(2, 6); let b = rand(1, 5);
-                    let c = rand(1, 5); let d = rand(2, 6);
-                    qText = `Tính định thức ma trận vuông 2x2:\n| ${a}    ${b} |\n| ${c}    ${d} |`;
-                    qAns = (a * d) - (b * c);
-                }
+                let a = rand(1, 30), b = rand(1, 30);
+                qText = `${a} + ${b} = ?`; qAns = a + b;
+            } else if (id <= 30) {
+                let a = rand(2, 12), b = rand(2, 15);
+                qText = `${a} × ${b} = ?`; qAns = a * b;
+            } else if (id <= 40) {
+                let a = rand(3, 15), b = rand(3, 10), c = rand(5, 50);
+                qText = `${a} × ${b} + ${c} = ?`; qAns = (a * b) + c;
+            } else {
+                let k = rand(2, 6), c = rand(1, 5);
+                qText = `Cho hàm số f(x) = ${k}x².\nTính đạo hàm f'(${c}) = ?`; qAns = 2 * k * c;
             }
 
             questionDisplay.innerText = qText;
@@ -499,9 +405,7 @@
         }
 
         function checkAnswer() {
-            if (isProcessing) return;
-            if (answerInput.value.trim() === "") return;
-            
+            if (isProcessing || answerInput.value.trim() === "") return;
             isProcessing = true;
             answerInput.disabled = true;
             submitBtn.disabled = true;
@@ -513,64 +417,24 @@
                 playSound('success');
                 baKhiScore += 999999;
                 updateBaKhiDisplay();
-
                 feedback.style.color = "#2ecc71";
                 feedback.innerText = "✨ +999,999 Bá Khí";
-
                 circle.classList.add('solved');
                 circle.innerText = "✔";
                 solvedCount++;
                 updateProgress();
-
-                setTimeout(() => {
-                    closeModal();
-                    if (solvedCount === 50) {
-                        alert("👑 CHÚNG MỪNG BẠN! BẠN ĐÃ HOÀN THÀNH XUẤT SẮC 50 CỬA ẢI TOÁN HỌC!\n🔥 Đích thực là PRO TOÀN NĂNG - BÁ KHÍ AURA TỎA SÁNG RỰC RỠ! 🚀");
-                    }
-                }, 800);
-
+                setTimeout(() => { closeModal(); }, 800);
             } else {
                 playSound('wrong');
                 baKhiScore -= 99999;
                 updateBaKhiDisplay();
-
                 feedback.style.color = "#e74c3c";
-                feedback.innerText = "❌  -99,999 Bá Khí (Sai rồi!)";
-
-                setTimeout(() => {
-                    closeModal();
-                }, 1000);
+                feedback.innerText = "❌ -99,999 Bá Khí (Sai rồi!)";
+                setTimeout(() => { closeModal(); }, 1000);
             }
         }
 
-        function closeModal() {
-            modal.style.display = 'none';
-        }
+        function closeModal() { modal.style.display = 'none'; }
     </script>
-
-    <!-- Script bảo mật và phân tích -->
-    <script>
-        if (localStorage.getItem('isAdminUnlocked') !== 'true') {
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'F12' || 
-                    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || 
-                    (e.ctrlKey && e.key === 'u')) {
-                    e.preventDefault();
-                    alert('Tính năng này đã bị khóa đối với người chơi!');
-                }
-            });
-            document.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-            });
-        }
-    </script>
-    
-    <script type="text/javascript">
-        var sc_project=13356885; 
-        var sc_invisible=1; 
-        var sc_security="6ef11a06"; 
-    </script>
-    <script type="text/javascript" src="https://www.statcounter.com/counter/counter.js" async></script>
-    <noscript><div class="statcounter"><a title="Web Analytics Made Easy - Statcounter" href="https://statcounter.com/" target="_blank"><img class="statcounter" src="https://c.statcounter.com/13356885/0/6ef11a06/1/" alt="Web Analytics Made Easy - Statcounter" referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
 </body>
 </html>
