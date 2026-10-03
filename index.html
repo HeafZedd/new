@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>50 Cửa Ải Toán Học</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* Màn hình chặn IP */
+        #ip-block-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #0f172a;
+            color: #ef4444;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            text-align: center;
+            padding: 20px;
+            font-family: monospace;
+        }
+        #ip-block-screen h1 { font-size: 32px; margin-bottom: 10px; }
+        #ip-block-screen p { color: #94a3b8; font-size: 16px; }
+
+        /* Hộp hiển thị Bá Khí ở góc trên bên phải */
+        .ba-khi-box {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #f1c40f;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #f1c40f;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 10;
+        }
+
+        /* Thanh tiến độ hoàn thành */
+        .progress-container {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: linear-gradient(90deg, #f1c40f, #e67e22);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* Phần chữ xuất hiện phía trên lưới */
+        .header-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .main-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #f1c40f;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+            margin: 0 0 8px 0;
+            letter-spacing: 1px;
+        }
+
+        .sub-title {
+            font-size: 16px;
+            color: #00ffff;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        /* Màu các cấp độ */
+        .c-lv1 { background: #3498db; } /* 1-10 */
+        .c-lv2 { background: #2ecc71; } /* 11-30 */
+        .c-lv3 { background: #e67e22; } /* 31-40 */
+        .c-lv4 { background: #9b59b6; } /* 41-50 */
+
+        /* Lưới 50 hình tròn */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 900px;
+        }
+
+        .circle {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            user-select: none;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .circle:hover {
+            transform: translateY(-5px) scale(1.1);
+        }
+
+        .circle.solved {
+            background: #f1c40f !important;
+            color: #333;
+            text-shadow: none;
+            border: 3px solid #fff;
+            cursor: not-allowed;
+        }
+        
+        .circle.solved:hover {
+            transform: none;
+        }
+
+        /* Cửa sổ Popup (Modal) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-box {
+            background: #fff;
+            color: #333;
+            width: 450px;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            position: relative;
+            animation: modalPop 0.3s ease;
+        }
+
+        @keyframes modalPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-box h2 {
+            margin-top: 0;
+            color: #e74c3c;
+            text-transform: uppercase;
+        }
+
+        #math-question {
+            font-size: 22px;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            white-space: pre-line;
+            color: #2c3e50;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 12px;
+            font-size: 18px;
+            border: 2px solid #3498db;
+            border-radius: 6px;
+            outline: none;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .btn-group {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn-submit {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-submit:hover { background: #219653; }
+        
+        .btn-submit:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .btn-close {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-close:hover { background: #7f8c8d; }
+
+        #feedback {
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 16px;
+            min-height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Màn hình chờ kiểm tra IP hoặc thông báo chặn -->
+    <div id="ip-block-screen">
+        <h1>🔒 Đang kiểm tra quyền truy cập...</h1>
+        <p>Hệ thống đang xác thực địa chỉ IP của bạn.</p>
+    </div>
+
+    <!-- Khung hiển thị Bá Khí ở góc trên bên phải -->
+    <div class="ba-khi-box">
+        Bá khí: <span id="ba-khi-score">0</span>
+    </div>
+
+    <!-- Phần chữ xuất hiện phía trên lưới -->
+    <div class="header-container">
+        <div class="main-title">câu hỏi của heafzedd</div>
+        <div class="sub-title">giải hết = pro + bá khí aura</div>
+    </div>
+
+    <!-- Thanh tiến độ -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <div class="grid-container" id="grid"></div>
+
+    <!-- Cửa sổ hiển thị câu hỏi -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-box">
+            <h2 id="modal-title">CÂU HỎI X</h2>
+            <div id="math-question">Đang tải câu hỏi...</div>
+            <input type="text" id="answer-input" placeholder="Nhập đáp án..." autocomplete="off">
+            <div class="btn-group">
+                <button class="btn-submit" id="submit-btn" onclick="checkAnswer()">Trả Lời</button>
+                <button class="btn-close" onclick="closeModal()">Đóng</button>
+            </div>
+            <div id="feedback"></div>
+        </div>
+    </div>
+
+    <script>
+        // HỆ THỐNG KIỂM TRA IP ĐỘC QUYỀN
+        const ALLOWED_IP = "42.114.215.26";
+
+        async function verifyIP() {
+            try {
+                // Sử dụng API lấy IP công cộng miễn phí
+                let response = await fetch('https://api.ipify.org?format=json');
+                let data = await response.json();
+                let userIP = data.ip;
+
+                if (userIP === ALLOWED_IP) {
+                    // Nếu khớp IP -> Cho ẩn màn hình chặn và mở trang web
+                    document.getElementById('ip-block-screen').style.display = 'none';
+                } else {
+                    // Nếu không khớp -> Hiển thị từ chối truy cập
+                    document.getElementById('ip-block-screen').innerHTML = `
+                        <h1 style="color: #ef4444;">⛔ TRUY CẬP BỊ TỪ CHỐI</h1>
+                        <p>IP của bạn (${userIP}) không được phép sử dụng trang web này.</p>
+                        <p style="font-size: 12px; margin-top: 15px; color: #64748b;">Chỉ IP: ${ALLOWED_IP} mới có quyền truy cập.</p>
+                    `;
+                }
+            } catch (error) {
+                // Trường hợp mất mạng hoặc lỗi API chặn, đề phòng hiển thị thông báo
+                document.getElementById('ip-block-screen').innerHTML = `
+                    <h1 style="color: #f59e0b;">⚠️ LỖI XÁC THỰC IP</h1>
+                    <p>Không thể kiểm tra địa chỉ IP của bạn. Vui lòng kiểm tra lại kết nối mạng.</p>
+                `;
+            }
+        }
+
+        // Chạy kiểm tra ngay khi tải trang
+        verifyIP();
+
+        // ----------------- CODE TRÒ CHƠI -----------------
+        const grid = document.getElementById('grid');
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const questionDisplay = document.getElementById('math-question');
+        const answerInput = document.getElementById('answer-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const feedback = document.getElementById('feedback');
+        const baKhiScoreDisplay = document.getElementById('ba-khi-score');
+        const progressBar = document.getElementById('progress-bar');
+        
+        let currentQuestionAnswer = null;
+        let currentCircleId = null;
+        let baKhiScore = 0; 
+        let solvedCount = 0;
+        let isProcessing = false;
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            if (type === 'success') {
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } else {
+                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(120, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            }
+        }
+
+        function updateBaKhiDisplay() {
+            baKhiScoreDisplay.innerText = baKhiScore.toLocaleString();
+        }
+
+        function updateProgress() {
+            let percent = (solvedCount / 50) * 100;
+            progressBar.style.width = percent + '%';
+        }
+
+        for (let i = 1; i <= 50; i++) {
+            const circle = document.createElement('div');
+            circle.classList.add('circle');
+            circle.innerText = i;
+            circle.id = 'circle-' + i;
+
+            if (i <= 10) circle.classList.add('c-lv1');
+            else if (i <= 30) circle.classList.add('c-lv2');
+            else if (i <= 40) circle.classList.add('c-lv3');
+            else circle.classList.add('c-lv4');
+
+            circle.onclick = () => openQuestion(i);
+            grid.appendChild(circle);
+        }
+
+        answerInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                checkAnswer();
+            }
+        });
+
+        function rand(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function openQuestion(id) {
+            let circle = document.getElementById('circle-' + id);
+            if (circle.classList.contains('solved')) {
+                return;
+            }
+
+            currentCircleId = id;
+            modalTitle.innerText = `CÂU HỎI ${id}`;
+            answerInput.value = "";
+            feedback.innerText = "";
+            
+            answerInput.disabled = false;
+            submitBtn.disabled = false;
+            isProcessing = false;
+
+            let qText = "";
+            let qAns = 0;
+
+            if (id <= 10) {
+                let type = rand(1, 2);
+                if (type === 1) {
+                    let a = rand(1, 30);
+                    let b = rand(1, 30);
+                    qText = `${a} + ${b} = ?`;
+                    qAns = a + b;
+                } else {
+                    let a = rand(15, 50);
+                    let b = rand(1, a); 
+                    qText = `${a} - ${b} = ?`;
+                    qAns = a - b;
+                }
+            } 
+            else if (id <= 30) {
+                let type = rand(1, 2);
+                if (type === 1) { 
+                    let a = rand(2, 12);
+                    let b = rand(2, 15);
+                    qText = `${a} × ${b} = ?`;
+                    qAns = a * b;
+                } else { 
+                    let b = rand(2, 15);
+                    let c = rand(2, 15);
+                    let a = b * c;
+                    qText = `${a} ÷ ${b} = ?`;
+                    qAns = c;
+                }
+            }
+            else if (id <= 40) {
+                let type = rand(1, 2);
+                if (type === 1) { 
+                    let a = rand(3, 15);
+                    let b = rand(3, 10);
+                    let c = rand(5, 50);
+                    qText = `${a} × ${b} + ${c} = ?`;
+                    qAns = (a * b) + c;
+                } else { 
+                    let x = rand(2, 15);
+                    let a = rand(2, 10);
+                    let b = rand(1, 20);
+                    let c = (a * x) - b;
+                    qText = `Tìm X biết:\n${a} × X - ${b} = ${c}`;
+                    qAns = x;
+                }
+            }
+            else {
+                let type = rand(1, 4);
+                if (type === 1) { 
+                    let k = rand(2, 6);
+                    let c = rand(1, 5);
+                    qText = `Cho hàm số f(x) = ${k}x².\nTính đạo hàm f'(${c}) = ?`;
+                    qAns = 2 * k * c;
+                } else if (type === 2) { 
+                    let a = rand(1, 4);
+                    let k = rand(1, 4) * 2; 
+                    qText = `Tích phân từ 0 đến ${a} của (${k}x)dx = ?`;
+                    qAns = (k / 2) * (a * a);
+                } else if (type === 3) { 
+                    let k = rand(2, 9);
+                    qText = `Tính giới hạn:\nlim(x→0) [sin(${k}x) / x] = ?`;
+                    qAns = k;
+                } else { 
+                    let a = rand(2, 6); let b = rand(1, 5);
+                    let c = rand(1, 5); let d = rand(2, 6);
+                    qText = `Tính định thức ma trận vuông 2x2:\n| ${a}    ${b} |\n| ${c}    ${d} |`;
+                    qAns = (a * d) - (b * c);
+                }
+            }
+
+            questionDisplay.innerText = qText;
+            currentQuestionAnswer = qAns;
+            modal.style.display = 'flex';
+            setTimeout(() => answerInput.focus(), 100);
+        }
+
+        function checkAnswer() {
+            if (isProcessing) return;
+            if (answerInput.value.trim() === "") return;
+            
+            isProcessing = true;
+            answerInput.disabled = true;
+            submitBtn.disabled = true;
+
+            let userAns = parseInt(answerInput.value.trim());
+            let circle = document.getElementById('circle-' + currentCircleId);
+
+            if (userAns === currentQuestionAnswer) {
+                playSound('success');
+                baKhiScore += 999999;
+                updateBaKhiDisplay();
+
+                feedback.style.color = "#2ecc71";
+                feedback.innerText = "✨ +999,999 Bá Khí";
+
+                circle.classList.add('solved');
+                circle.innerText = "✔";
+                solvedCount++;
+                updateProgress();
+
+                setTimeout(() => {
+                    closeModal();
+                    if (solvedCount === 50) {
+                        alert("👑 CHÚNG MỪNG BẠN! BẠN ĐÃ HOÀN THÀNH XUẤT SẮC 50 CỬA ẢI TOÁN HỌC!\n🔥 Đích thực là PRO TOÀN NĂNG - BÁ KHÍ AURA TỎA SÁNG RỰC RỠ! 🚀");
+                    }
+                }, 800);
+
+            } else {
+                playSound('wrong');
+                baKhiScore -= 99999;
+                updateBaKhiDisplay();
+
+                feedback.style.color = "#e74c3c";
+                feedback.innerText = "❌  -99,999 Bá Khí (Sai rồi!)";
+
+                setTimeout(() => {
+                    closeModal();
+                }, 1000);
+            }
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+    </script>
+
+    <!-- Script bảo mật và phân tích -->
+    <script>
+        if (localStorage.getItem('isAdminUnlocked') !== 'true') {
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'F12' || 
+                    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || 
+                    (e.ctrlKey && e.key === 'u')) {
+                    e.preventDefault();
+                    alert('Tính năng này đã bị khóa đối với người chơi!');
+                }
+            });
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+        }
+    </script>
+    
+    <script type="text/javascript">
+        var sc_project=13356885; 
+        var sc_invisible=1; 
+        var sc_security="6ef11a06"; 
+    </script>
+    <script type="text/javascript" src="https://www.statcounter.com/counter/counter.js" async></script>
+    <noscript><div class="statcounter"><a title="Web Analytics Made Easy - Statcounter" href="https://statcounter.com/" target="_blank"><img class="statcounter" src="https://c.statcounter.com/13356885/0/6ef11a06/1/" alt="Web Analytics Made Easy - Statcounter" referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+</body>
+</html>
